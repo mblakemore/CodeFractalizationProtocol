@@ -255,6 +255,377 @@ Negative:
 - Migration complexity
 - Maintenance burden
 
+# ADR-009: Novel Solution Discovery Framework
+
+### Status
+Accepted
+
+### Context
+AI systems within the protocol may discover novel solution patterns that:
+- Meet contract requirements in unexpected ways
+- Optimize across fractal boundaries
+- Create new usage patterns not anticipated in original contracts
+Need a structured way to validate, incorporate, and share these discoveries.
+
+### Decision
+Implement a Novel Solution Discovery Framework that includes:
+1. Solution validation and monitoring
+2. Pattern extraction and registry
+3. Contract evolution support
+4. Cross-fractal optimization management
+5. Integration coordination with existing protocol components
+
+### Consequences
+Positive:
+- Structured handling of AI innovations
+- Knowledge sharing across fractals
+- Safe contract evolution
+- Improved system optimization
+- Better pattern reuse
+
+Negative:
+- Additional system complexity
+- New monitoring overhead 
+- Pattern registry maintenance
+- Integration coordination costs
+- Increased validation requirements
+
+# ADR-010: Decision by Committee Pattern
+
+## Status
+Proposed
+
+## Context
+The protocol needs robust mechanisms for handling uncertainty in AI decision-making that:
+- Improves decision reliability through multiple perspectives
+- Handles varying levels of confidence
+- Manages conflicting outputs
+- Provides clear audit trails
+- Scales effectively
+- Maintains performance requirements
+
+## Decision
+Implement a comprehensive decision by committee pattern with dynamic pools and parallel execution paths:
+
+1. Dynamic Pool Management
+   - Variable-size member pools based on domain
+   - Dynamic committee formation from pools
+   - Expertise scoring and weighting by domain
+   - Automatic pool scaling based on demand
+   - Pool health monitoring and maintenance
+
+2. Parallel Solution Development
+   - Concurrent solution path exploration
+   - Independent solution development tracks
+   - State snapshot management for failback
+   - Solution path health monitoring
+   - Cross-path learning and optimization
+
+3. Decision Synthesis
+   - Weighted majority voting with domain expertise factors
+   - Solution path success rate weighting
+   - State-aware decision validation
+   - Automatic failback trigger criteria
+   - Cross-solution learning patterns
+
+4. Context Management
+   - Shared context distribution
+   - Individual perspective tracking
+   - Decision history preservation
+   - Pattern recognition across decisions
+
+## Consequences
+
+### Positive
+- More robust decision-making
+- Better uncertainty quantification
+- Clear audit trails
+- Pattern learning opportunities
+- Graceful degradation options
+- Enhanced safety through diversity
+
+### Negative
+- Increased latency for decisions
+- Higher resource utilization
+- More complex orchestration
+- Potential for deadlocks
+- Additional monitoring requirements
+
+## Implementation Notes
+
+1. Pool Management
+```python
+class DynamicPoolManager:
+    def manage_pools(self, domain_context):
+        return {
+            'active_pools': self.maintain_domain_pools(domain_context),
+            'expertise_weights': self.calculate_expertise_weights(domain_context),
+            'pool_health': self.monitor_pool_health(),
+            'scaling_status': self.manage_pool_scaling()
+        }
+
+    def maintain_domain_pools(self, context):
+        return {
+            domain: Pool(
+                members=self.select_domain_members(domain),
+                expertise_matrix=self.build_expertise_matrix(domain),
+                health_metrics=self.track_pool_health(domain),
+                scaling_config=self.get_scaling_config(domain)
+            )
+            for domain in context.domains
+        }
+```
+
+2. Parallel Solution Management
+```python
+class ParallelSolutionManager:
+    def manage_solution_paths(self, problem_context):
+        # Initialize parallel paths
+        paths = self.initialize_solution_paths(problem_context)
+        
+        # Create state snapshots for failback
+        snapshots = self.create_state_snapshots(paths)
+        
+        # Monitor and manage parallel execution
+        results = await self.execute_parallel_paths(paths, snapshots)
+        
+        # Analyze results and prepare failback options
+        return PathResults(
+            solutions=results.solutions,
+            success_metrics=self.calculate_success_metrics(results),
+            health_status=self.assess_path_health(results),
+            failback_options=self.prepare_failback_options(snapshots)
+        )
+```
+
+3. Decision Synthesis and Failback
+```python
+class DecisionSynthesizer:
+    def synthesize_decision(self, path_results, expertise_weights):
+        # Weight solutions by expertise and success rates
+        weighted_solutions = self.apply_weights(
+            solutions=path_results.solutions,
+            expertise=expertise_weights,
+            success_rates=path_results.success_metrics
+        )
+        
+        # Validate against state snapshots
+        validation = self.validate_against_states(
+            solutions=weighted_solutions,
+            snapshots=path_results.state_snapshots
+        )
+        
+        # Prepare failback options
+        failback = self.prepare_failback_options(
+            solutions=weighted_solutions,
+            validation=validation,
+            snapshots=path_results.state_snapshots
+        )
+        
+        return SynthesisResult(
+            primary_solution=self.select_primary_solution(weighted_solutions),
+            confidence=self.calculate_confidence(validation),
+            failback_paths=failback,
+            learning_patterns=self.extract_patterns(path_results)
+        )
+```
+
+## Migration Strategy
+
+1. Start with simple committees and fixed voting
+2. Gradually introduce dynamic formation
+3. Add weighted voting mechanisms
+4. Implement advanced aggregation
+5. Enable pattern learning
+6. Scale to distributed committees
+
+## Success Metrics
+
+1. Decision Quality
+   - Accuracy improvement over single decisions
+   - Confidence correlation with outcomes
+   - Pattern recognition effectiveness
+   - Learning rate over time
+
+2. System Performance
+   - Latency impact
+   - Resource utilization
+   - Scaling characteristics
+   - Formation efficiency
+
+3. Operational Metrics
+   - Committee formation success rate
+   - Consensus achievement rate
+   - Deadlock frequency
+   - Pattern reuse effectiveness# ADR-010: Decision by Committee Pattern
+
+## Status
+Proposed
+
+## Context
+The protocol needs robust mechanisms for handling uncertainty in AI decision-making that:
+- Improves decision reliability through multiple perspectives
+- Handles varying levels of confidence
+- Manages conflicting outputs
+- Provides clear audit trails
+- Scales effectively
+- Maintains performance requirements
+
+## Decision
+Implement a comprehensive decision by committee pattern with dynamic pools and parallel execution paths:
+
+1. Dynamic Pool Management
+   - Variable-size member pools based on domain
+   - Dynamic committee formation from pools
+   - Expertise scoring and weighting by domain
+   - Automatic pool scaling based on demand
+   - Pool health monitoring and maintenance
+
+2. Parallel Solution Development
+   - Concurrent solution path exploration
+   - Independent solution development tracks
+   - State snapshot management for failback
+   - Solution path health monitoring
+   - Cross-path learning and optimization
+
+3. Decision Synthesis
+   - Weighted majority voting with domain expertise factors
+   - Solution path success rate weighting
+   - State-aware decision validation
+   - Automatic failback trigger criteria
+   - Cross-solution learning patterns
+
+4. Context Management
+   - Shared context distribution
+   - Individual perspective tracking
+   - Decision history preservation
+   - Pattern recognition across decisions
+
+## Consequences
+
+### Positive
+- More robust decision-making
+- Better uncertainty quantification
+- Clear audit trails
+- Pattern learning opportunities
+- Graceful degradation options
+- Enhanced safety through diversity
+
+### Negative
+- Increased latency for decisions
+- Higher resource utilization
+- More complex orchestration
+- Potential for deadlocks
+- Additional monitoring requirements
+
+## Implementation Notes
+
+1. Pool Management
+```python
+class DynamicPoolManager:
+    def manage_pools(self, domain_context):
+        return {
+            'active_pools': self.maintain_domain_pools(domain_context),
+            'expertise_weights': self.calculate_expertise_weights(domain_context),
+            'pool_health': self.monitor_pool_health(),
+            'scaling_status': self.manage_pool_scaling()
+        }
+
+    def maintain_domain_pools(self, context):
+        return {
+            domain: Pool(
+                members=self.select_domain_members(domain),
+                expertise_matrix=self.build_expertise_matrix(domain),
+                health_metrics=self.track_pool_health(domain),
+                scaling_config=self.get_scaling_config(domain)
+            )
+            for domain in context.domains
+        }
+```
+
+2. Parallel Solution Management
+```python
+class ParallelSolutionManager:
+    def manage_solution_paths(self, problem_context):
+        # Initialize parallel paths
+        paths = self.initialize_solution_paths(problem_context)
+        
+        # Create state snapshots for failback
+        snapshots = self.create_state_snapshots(paths)
+        
+        # Monitor and manage parallel execution
+        results = await self.execute_parallel_paths(paths, snapshots)
+        
+        # Analyze results and prepare failback options
+        return PathResults(
+            solutions=results.solutions,
+            success_metrics=self.calculate_success_metrics(results),
+            health_status=self.assess_path_health(results),
+            failback_options=self.prepare_failback_options(snapshots)
+        )
+```
+
+3. Decision Synthesis and Failback
+```python
+class DecisionSynthesizer:
+    def synthesize_decision(self, path_results, expertise_weights):
+        # Weight solutions by expertise and success rates
+        weighted_solutions = self.apply_weights(
+            solutions=path_results.solutions,
+            expertise=expertise_weights,
+            success_rates=path_results.success_metrics
+        )
+        
+        # Validate against state snapshots
+        validation = self.validate_against_states(
+            solutions=weighted_solutions,
+            snapshots=path_results.state_snapshots
+        )
+        
+        # Prepare failback options
+        failback = self.prepare_failback_options(
+            solutions=weighted_solutions,
+            validation=validation,
+            snapshots=path_results.state_snapshots
+        )
+        
+        return SynthesisResult(
+            primary_solution=self.select_primary_solution(weighted_solutions),
+            confidence=self.calculate_confidence(validation),
+            failback_paths=failback,
+            learning_patterns=self.extract_patterns(path_results)
+        )
+```
+
+## Migration Strategy
+
+1. Start with simple committees and fixed voting
+2. Gradually introduce dynamic formation
+3. Add weighted voting mechanisms
+4. Implement advanced aggregation
+5. Enable pattern learning
+6. Scale to distributed committees
+
+## Success Metrics
+
+1. Decision Quality
+   - Accuracy improvement over single decisions
+   - Confidence correlation with outcomes
+   - Pattern recognition effectiveness
+   - Learning rate over time
+
+2. System Performance
+   - Latency impact
+   - Resource utilization
+   - Scaling characteristics
+   - Formation efficiency
+
+3. Operational Metrics
+   - Committee formation success rate
+   - Consensus achievement rate
+   - Deadlock frequency
+   - Pattern reuse effectiveness
+
 ## Future Considerations
 
 ### Under Discussion
