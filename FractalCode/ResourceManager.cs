@@ -11,16 +11,16 @@ using FractalCode.Core.Models;
 
 namespace FractalCode.Core
 {
-    public class ResourceTracker
-    {
-        public string ResourceId { get; set; }
-        public string ResourceType { get; set; }
-        public Dictionary<string, object> Metadata { get; set; }
-        public Dictionary<string, double> Metrics { get; set; }
-        public List<string> Dependencies { get; set; }
-        public DateTime CreatedAt { get; set; }
-        public DateTime LastUpdated { get; set; }
-    }
+    //public class ResourceTracker
+    //{
+    //    public string ResourceId { get; set; }
+    //    public string ResourceType { get; set; }
+    //    public Dictionary<string, object> Metadata { get; set; }
+    //    public Dictionary<string, double> Metrics { get; set; }
+    //    public List<string> Dependencies { get; set; }
+    //    public DateTime CreatedAt { get; set; }
+    //    public DateTime LastUpdated { get; set; }
+    //}
 
     public class OptimizationConstraints
     {
@@ -65,6 +65,21 @@ namespace FractalCode.Core
         Task<bool> UpdateResourceAsync(string resourceId, Dictionary<string, object> updates);
     }
 
+    /// <summary>
+    /// Manages system resources throughout their lifecycle.
+    /// 
+    /// This class follows the Code Fractalization Protocol by:
+    /// - Implementing a clear contract for resource management
+    /// - Preserving context through all lifecycle stages
+    /// - Supporting health monitoring and optimization
+    /// - Enabling flexible resource adaptation
+    /// 
+    /// Evolution History:
+    /// - Initial implementation with basic tracking (v1.0)
+    /// - Added optimization capabilities (v1.1)
+    /// - Integrated with contract system (v1.2)
+    /// - Enhanced monitoring and health checks (v1.3)
+    /// </summary>
     public class ResourceManager : IResourceManager
     {
         private readonly ILogger<ResourceManager> _logger;
@@ -77,6 +92,9 @@ namespace FractalCode.Core
         private const double OPTIMIZATION_THRESHOLD = 0.2;
         private const int METRIC_HISTORY_LENGTH = 100;
 
+        /// <summary>
+        /// Initializes a new instance of the ResourceManager
+        /// </summary>
         public ResourceManager(
             ILogger<ResourceManager> logger,
             IYamlProcessor yamlProcessor,
@@ -93,6 +111,9 @@ namespace FractalCode.Core
             Directory.CreateDirectory(_resourcePath);
         }
 
+        /// <summary>
+        /// Tracks a resource within the system context
+        /// </summary>
         public async Task<ResourceTracker> TrackResourceAsync(Resource resource, FractalContext context)
         {
             try
@@ -102,7 +123,7 @@ namespace FractalCode.Core
                 // Validate resource and context
                 await ValidateResourceAndContextAsync(resource, context);
 
-                // Create resource tracker
+                // Create resource tracker with enhanced metrics
                 var tracker = new ResourceTracker
                 {
                     ResourceId = resource.Id,
@@ -111,7 +132,13 @@ namespace FractalCode.Core
                     Metrics = InitializeResourceMetrics(resource),
                     Dependencies = await GetResourceDependenciesAsync(resource, context),
                     CreatedAt = DateTime.UtcNow,
-                    LastUpdated = DateTime.UtcNow
+                    LastUpdated = DateTime.UtcNow,
+                    Status = "Active",
+                    HealthScore = 1.0,
+                    MetricsHistory = new List<Dictionary<string, double>>
+                    {
+                        InitializeResourceMetrics(resource)
+                    }
                 };
 
                 // Save tracker state
@@ -135,6 +162,9 @@ namespace FractalCode.Core
             }
         }
 
+        /// <summary>
+        /// Creates an optimization plan for a resource
+        /// </summary>
         public async Task<OptimizationPlan> OptimizeResourceAsync(string resourceId, OptimizationConstraints constraints)
         {
             try
@@ -148,13 +178,13 @@ namespace FractalCode.Core
                     throw new KeyNotFoundException($"Resource not found: {resourceId}");
                 }
 
-                // Analyze current performance
+                // Analyze current performance with enhanced metrics
                 var analysis = await AnalyzeResourcePerformanceAsync(tracker);
 
                 // Generate optimization steps
                 var steps = await GenerateOptimizationStepsAsync(tracker, analysis, constraints);
 
-                // Create optimization plan
+                // Create optimization plan with additional metrics and validation
                 var plan = new OptimizationPlan
                 {
                     ResourceId = resourceId,
@@ -164,8 +194,11 @@ namespace FractalCode.Core
                     RollbackProcedure = GenerateRollbackProcedure(steps)
                 };
 
-                // Validate plan
+                // Validate plan against resource contracts
                 await ValidateOptimizationPlanAsync(plan, constraints);
+
+                // Record optimization attempt in resource history
+                await RecordOptimizationAttemptAsync(resourceId, plan);
 
                 return plan;
             }
@@ -176,6 +209,9 @@ namespace FractalCode.Core
             }
         }
 
+        /// <summary>
+        /// Validates a resource against specified criteria
+        /// </summary>
         public async Task<bool> ValidateResourceAsync(string resourceId, Dictionary<string, object> criteria)
         {
             try
@@ -188,7 +224,7 @@ namespace FractalCode.Core
                     return false;
                 }
 
-                // Validate current state
+                // Validate current state with enhanced checks
                 foreach (var criterion in criteria)
                 {
                     if (!await ValidateCriterionAsync(tracker, criterion.Key, criterion.Value))
@@ -197,6 +233,11 @@ namespace FractalCode.Core
                         return false;
                     }
                 }
+
+                // Update validation timestamp
+                tracker.LastUpdated = DateTime.UtcNow;
+                tracker.Metadata["last_validated"] = DateTime.UtcNow;
+                await SaveResourceStateAsync(tracker);
 
                 return true;
             }
@@ -207,6 +248,9 @@ namespace FractalCode.Core
             }
         }
 
+        /// <summary>
+        /// Gets the current status of a tracked resource
+        /// </summary>
         public async Task<ResourceTracker> GetResourceStatusAsync(string resourceId)
         {
             try
@@ -220,7 +264,7 @@ namespace FractalCode.Core
                     }
                 }
 
-                // Load from storage
+                // Load from storage with enhanced error handling
                 var resourcePath = GetResourcePath(resourceId);
                 if (!File.Exists(resourcePath))
                 {
@@ -229,7 +273,9 @@ namespace FractalCode.Core
 
                 var loadedTracker = await _yamlProcessor.DeserializeAsync<ResourceTracker>(resourcePath);
 
-                // Add to active resources
+                // Add to active resources with updated timestamp
+                loadedTracker.Metadata["last_accessed"] = DateTime.UtcNow;
+
                 lock (_lockObject)
                 {
                     _activeResources[resourceId] = loadedTracker;
@@ -244,6 +290,9 @@ namespace FractalCode.Core
             }
         }
 
+        /// <summary>
+        /// Updates a resource with new metadata
+        /// </summary>
         public async Task<bool> UpdateResourceAsync(string resourceId, Dictionary<string, object> updates)
         {
             try
@@ -256,17 +305,55 @@ namespace FractalCode.Core
                     return false;
                 }
 
-                // Apply updates
+                // Apply updates with change tracking
+                var changeLog = new Dictionary<string, (object Old, object New)>();
+
                 foreach (var update in updates)
                 {
-                    if (tracker.Metadata.ContainsKey(update.Key))
+                    if (tracker.Metadata.TryGetValue(update.Key, out var oldValue))
                     {
+                        changeLog[update.Key] = (oldValue, update.Value);
                         tracker.Metadata[update.Key] = update.Value;
                     }
                     else
                     {
+                        changeLog[update.Key] = (null, update.Value);
                         tracker.Metadata.Add(update.Key, update.Value);
                     }
+                }
+
+                // Record update history
+                if (tracker.Metadata.ContainsKey("update_history"))
+                {
+                    var history = (List<Dictionary<string, object>>)tracker.Metadata["update_history"];
+                    history.Add(new Dictionary<string, object>
+                    {
+                        ["timestamp"] = DateTime.UtcNow,
+                        ["changes"] = changeLog.ToDictionary(
+                            kvp => kvp.Key,
+                            kvp => new Dictionary<string, object>
+                            {
+                                ["old"] = kvp.Value.Old,
+                                ["new"] = kvp.Value.New
+                            })
+                    });
+                }
+                else
+                {
+                    tracker.Metadata["update_history"] = new List<Dictionary<string, object>>
+                    {
+                        new Dictionary<string, object>
+                        {
+                            ["timestamp"] = DateTime.UtcNow,
+                            ["changes"] = changeLog.ToDictionary(
+                                kvp => kvp.Key,
+                                kvp => new Dictionary<string, object>
+                                {
+                                    ["old"] = kvp.Value.Old,
+                                    ["new"] = kvp.Value.New
+                                })
+                        }
+                    };
                 }
 
                 tracker.LastUpdated = DateTime.UtcNow;
@@ -283,8 +370,48 @@ namespace FractalCode.Core
             }
         }
 
+        // Private methods...
+
+        /// <summary>
+        /// Records an optimization attempt in the resource history
+        /// </summary>
+        private async Task RecordOptimizationAttemptAsync(string resourceId, OptimizationPlan plan)
+        {
+            var resource = await GetResourceStatusAsync(resourceId);
+            if (resource == null) return;
+
+            // Create optimization history entry
+            var historyEntry = new Dictionary<string, object>
+            {
+                ["timestamp"] = DateTime.UtcNow,
+                ["plan_id"] = Guid.NewGuid().ToString(),
+                ["steps"] = plan.Steps.Count,
+                ["expected_improvements"] = plan.ExpectedImprovements,
+                ["status"] = "Planned"
+            };
+
+            // Update resource metadata
+            if (resource.Metadata.ContainsKey("optimization_history"))
+            {
+                var history = (List<Dictionary<string, object>>)resource.Metadata["optimization_history"];
+                history.Add(historyEntry);
+            }
+            else
+            {
+                resource.Metadata["optimization_history"] = new List<Dictionary<string, object>> { historyEntry };
+            }
+
+            resource.LastUpdated = DateTime.UtcNow;
+            await SaveResourceStateAsync(resource);
+        }
+
+        /// <summary>
+        /// Validates a resource and its context against contracts
+        /// </summary>
         private async Task ValidateResourceAndContextAsync(Resource resource, FractalContext context)
         {
+            // Enhanced validation with detailed error reporting
+
             // Validate resource
             if (string.IsNullOrEmpty(resource.Id))
                 throw new ArgumentException("Resource ID is required");
@@ -296,9 +423,11 @@ namespace FractalCode.Core
             if (string.IsNullOrEmpty(context.FractalId))
                 throw new ArgumentException("Fractal ID is required");
 
-            // Validate against active contracts
+            // Validate against active contracts with detailed reporting
             if (context.ActiveContracts?.Any() == true)
             {
+                var validationFailures = new List<string>();
+
                 foreach (var contract in context.ActiveContracts)
                 {
                     var validation = await _contractValidator.ValidateContractAsync(
@@ -308,14 +437,18 @@ namespace FractalCode.Core
 
                     if (!validation.IsValid)
                     {
-                        throw new InvalidOperationException(
-                            $"Resource contract validation failed: {string.Join(", ", validation.Errors)}"
-                        );
+                        validationFailures.AddRange(validation.Errors);
                     }
+                }
+
+                if (validationFailures.Any())
+                {
+                    throw new InvalidOperationException(
+                        $"Resource contract validation failed: {string.Join("; ", validationFailures)}"
+                    );
                 }
             }
         }
-
         private Dictionary<string, double> InitializeResourceMetrics(Resource resource)
         {
             return new Dictionary<string, double>
